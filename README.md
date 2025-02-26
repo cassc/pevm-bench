@@ -10,6 +10,3 @@ JEMALLOC_SYS_WITH_MALLOC_CONF="thp:always,metadata_thp:always" taskset -c -a 0-1
 
 Note:
 - pevm version used: 4e8ff98e54c76af2c52072ca19b0d96eb5c6b6e9
-
-Caveat:
-- Transaction nonce check is skipped by setting `tx.nonce = None`
