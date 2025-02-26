@@ -1,4 +1,4 @@
-use std::{fs::File, io::BufReader, num::NonZeroUsize, sync::Arc, thread};
+use std::{fs::File, io::BufReader, num::NonZeroUsize, sync::Arc};
 
 use alloy_primitives::{keccak256, Address, TxKind, U256};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
@@ -64,6 +64,13 @@ fn benchmark_input_json(c: &mut Criterion, input_json_file_name: &str, num_txs: 
         accounts.insert(*address, account.into());
     });
 
+    let sender_account = accounts
+        .get(&test.transaction.sender.unwrap())
+        .unwrap()
+        .clone();
+
+    let contract_account = accounts.get(&test.transaction.to.unwrap()).unwrap().clone();
+
     // iter over accounts and get the bytecodes
     accounts.iter().for_each(|(_address, account)| {
         if let Some(ref bytecode) = account.code.clone() {
@@ -111,13 +118,18 @@ fn benchmark_input_json(c: &mut Criterion, input_json_file_name: &str, num_txs: 
     };
     tx.transact_to = to;
 
-    let txs = (0..num_txs)
-        .map(|i| {
-            let mut tx = tx.clone();
-            tx.nonce = Some(initial_nonce + u64::try_from(i).unwrap());
-            tx
-        })
-        .collect::<Vec<_>>();
+    let mut txs = vec![];
+    for _ in 0..num_txs {
+        let mut tx = tx.clone();
+        let rand_address = Address::new(rand::random());
+        accounts.insert(rand_address, sender_account.clone());
+
+        // todo need to modify the storage in the contract to make the sender have proper states
+
+        tx.caller = rand_address;
+        txs.push(tx);
+    }
+
     let storage = InMemoryStorage::new(accounts, Arc::clone(&bytecodes), Arc::clone(&block_hashes));
 
     let id = format!(
