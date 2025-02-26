@@ -5,7 +5,7 @@
 Benchmark pevm by testing with provided transactions
 
 ``` bash
-taskset -c -a 0-15 cargo run --release -- --bench
+JEMALLOC_SYS_WITH_MALLOC_CONF="thp:always,metadata_thp:always" taskset -c -a 0-15 cargo run --release -- --bench
 ```
 
 Note:
@@ -13,12 +13,3 @@ Note:
 
 Caveat:
 - Transaction nonce check is skipped by setting `tx.nonce = None`
-
-# Benchmark result
-
-Hardward information: Intel(R) Xeon(R) Gold 5317 CPU @ 3.00GHz / 24 cores
-
-
-``` bash
-
-```

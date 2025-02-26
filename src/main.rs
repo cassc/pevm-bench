@@ -16,9 +16,7 @@ use revme::cmd::statetest::models::TestSuite;
 fn benchmark_input_json(c: &mut Criterion, input_json_file_name: &str, num_txs: usize) {
     let mut pevm = Pevm::default();
     let chain = PevmEthereum::mainnet();
-    let concurrency_level = thread::available_parallelism()
-        .unwrap_or(NonZeroUsize::MIN)
-        .min(NonZeroUsize::new(8).unwrap());
+    let concurrency_level = NonZeroUsize::new(8).unwrap();
 
     let data_dir = std::path::PathBuf::from("data");
     let input_json = data_dir.join(input_json_file_name);
@@ -141,24 +139,39 @@ fn benchmark_input_json(c: &mut Criterion, input_json_file_name: &str, num_txs: 
     });
 }
 
-fn main_benchmark(c: &mut Criterion) {
-    let data_dir = std::path::PathBuf::from("data");
-    let files = std::fs::read_dir(data_dir).unwrap();
+struct TestCase {
+    filename: String,
+    txs_nums: Vec<usize>,
+}
 
-    for file in files {
-        let file = file.unwrap();
-        let file_name = file.file_name().into_string().unwrap();
-        if file_name.ends_with(".json") {
-            let v_num_txs = if file_name.contains("uniswap3") || file_name.contains("multiple") {
-                vec![1]
-            } else if file_name.contains("uniswap") {
-                vec![1, 10, 100]
-            } else {
-                vec![1, 10, 100, 200, 2000, 20000]
-            };
-            v_num_txs.iter().for_each(|num_txs| {
-                benchmark_input_json(c, &file_name, *num_txs);
-            });
+fn main_benchmark(c: &mut Criterion) {
+    let test_cases = vec![
+        TestCase {
+            filename: "erc20_transfer_basic_usdt.json".into(),
+            txs_nums: vec![1, 10, 100, 200, 2000],
+        },
+        TestCase {
+            filename: "erc20_transfer_proxy_usdc.json".into(),
+            txs_nums: vec![1, 10, 100, 200, 2000],
+        },
+        TestCase {
+            filename: "uniswap2_single.json".into(),
+            txs_nums: vec![1, 10, 100],
+        },
+        TestCase {
+            filename: "uniswap2_multiple.json".into(),
+            txs_nums: vec![1],
+        },
+        TestCase {
+            filename: "uniswap3_single.json".into(),
+            txs_nums: vec![1],
+        },
+    ];
+
+    // test each case
+    for test_case in test_cases {
+        for txs_num in test_case.txs_nums {
+            benchmark_input_json(c, &test_case.filename, txs_num);
         }
     }
 }
