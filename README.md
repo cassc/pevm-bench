@@ -5,7 +5,7 @@
 Benchmark pevm by testing with provided transactions
 
 ``` bash
-cargo run --release -- --bench
+taskset -c -a 0-15 cargo run --release -- --bench
 ```
 
 Note:
@@ -16,10 +16,7 @@ Caveat:
 
 # Benchmark result
 
-Hardward information:
-- AMD Ryzen 5 3600 (12) @ 4.44 GHz
-- 32 GB 3600 MHz DDR4
-
+Hardward information: Intel(R) Xeon(R) Gold 5317 CPU @ 3.00GHz / 24 cores
 
 
 ``` bash

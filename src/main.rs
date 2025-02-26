@@ -152,9 +152,9 @@ fn main_benchmark(c: &mut Criterion) {
             let v_num_txs = if file_name.contains("uniswap3") || file_name.contains("multiple") {
                 vec![1]
             } else if file_name.contains("uniswap") {
-                vec![1, 10]
+                vec![1, 10, 100]
             } else {
-                vec![1, 10, 100, 200]
+                vec![1, 10, 100, 200, 2000, 20000]
             };
             v_num_txs.iter().for_each(|num_txs| {
                 benchmark_input_json(c, &file_name, *num_txs);
